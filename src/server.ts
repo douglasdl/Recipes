@@ -99,7 +99,7 @@ app.get('/recipes', async () => {
 // });
 
 app.listen({
-    host: '192.168.10.112',
+    host: '192.168.10.113',
     port: process.env.PORT ? Number(process.env.PORT) : port,
 }).then(() => {
     console.log(`Server is listening on port ${port}`);
