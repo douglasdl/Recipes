@@ -11,17 +11,34 @@ router.post('/', async (request: Request, response: Response) => {
     const newRecipe = await prisma.recipes.create({
       data: { title, making_time, serves, ingredients, cost }
     });
-    response.status(201).json(newRecipe);
+    response.status(201).json({
+      message: "Recipe successfully created!",
+      recipe: [ newRecipe ] 
+    });
   } catch (error) {
-    response.status(500).json({ error: 'An error has occured while creating the recipe!' });    
+    response.status(500).json({
+      message: "Recipe creation failed!",
+      required: "title, making_time, serves, ingredients, cost"
+    });    
   }
 })
 
 // Return a list of all the recipes
 router.get('/', async (request: Request, response: Response) => {
   try {
-    const recipes = await prisma.recipes.findMany();
-    response.json(recipes);
+    const recipes = await prisma.recipes.findMany({
+      select: {
+        id: true,
+        title: true,
+        making_time: true,
+        serves: true,
+        ingredients: true,
+        cost: true
+      }
+    });
+    response.json({
+      recipes: recipes 
+    });
   } catch (error) {
     response.status(500).json({ error: 'An error has occured while fetching recipes!' });    
   }
@@ -33,10 +50,21 @@ router.get('/:id', async (request: Request, response: Response) => {
     const recipe = await prisma.recipes.findUnique({
       where: {
         id: parseInt(request.params.id)
+      },
+      select: {
+        id: true,
+        title: true,
+        making_time: true,
+        serves: true,
+        ingredients: true,
+        cost: true
       }
     });
     if(recipe) {
-      response.json(recipe);
+      response.json({
+        message: "Recipe details by id",
+        recipe: [ recipe ]
+      });
     } else {
       response.status(404).json({ message: 'Recipe not found!' });
     }
@@ -51,11 +79,21 @@ router.patch('/:id', async (request: Request, response: Response) => {
     const { title, making_time, serves, ingredients, cost } = request.body;
     const updatedRecipe = await prisma.recipes.update({
       where: {
-        id: parseInt(request.params.id)
+        id: parseInt(request.params.id),
       },
-      data: { title, making_time, serves, ingredients, cost }
+      data: { title, making_time, serves, ingredients, cost },
+      select: {
+        title: true,
+        making_time: true,
+        serves: true,
+        ingredients: true,
+        cost: true
+      }
     });
-    response.json(updatedRecipe);
+    response.json({
+      message: "Recipe successfully updated!",
+      recipe: [ updatedRecipe ] 
+    });
   } catch (error) {
     response.status(404).json({ error: 'Recipe not found or update failed!' });    
   }
@@ -64,14 +102,16 @@ router.patch('/:id', async (request: Request, response: Response) => {
 // Delete the selected recipe
 router.delete('/:id', async (request: Request, response: Response) => {
   try {
-    const deletedRecipe = await prisma.recipes.delete({
+    await prisma.recipes.delete({
       where: {
         id: parseInt(request.params.id)
       }
     });
-    response.json(deletedRecipe);
+    response.json({
+      message: "Recipe successfully removed!"
+    });
   } catch (error) {
-    response.status(404).json({ error: 'Recipe not found or deletion failed!' });    
+    response.status(404).json({ message: "No recipe found" });
   }
 })
 
