@@ -5,6 +5,11 @@ Install the dependencies:
 pnpm i
 ```
 
+Create the tsconfig.json:
+```sh
+npx tsc --init
+```
+
 Start the project:
 ```sh
 pnpm run dev
